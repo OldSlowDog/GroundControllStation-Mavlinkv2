@@ -1,69 +1,39 @@
 # Changelog — INAV Stellar GCS
 
-本文件由 `scripts/auto_sync.py` 自动生成，记录项目的版本历史。
+本文件由定时任务（每日 20:00）自动检测变更并更新。
 
-> 💡 格式参考：[Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)
-> 📌 版本规则：语义化版本（Semantic Versioning）—— `MAJOR.MINOR.PATCH`
+> 格式标准：[Keep a Changelog](https://keepachangelog.com/zh-CN/1.1.0/)
+> 版本规则：语义化版本 `MAJOR.MINOR.PATCH`
 
 ---
 
-## [Unreleased] — 开发中
+## [Unreleased]
 
-> 尚未发布的变更将出现在这里。
+> 尚未发布的变更将出现在此。
 
 ---
 
 ## [1.0.0] — 2026-06-10
 
-### ✨ Added（新增）
-- 初始化 INAV Stellar Ground Control Station 项目
-- 主程序入口 `main.py`，基于 PyQt5 的现代化深色主题 GUI
-- **连接与通信模块**（`core/communication.py`）：串口 / TCP / MQTT 多路连接，自动重连
-- **MAVLink 2.0 协议栈**（`core/protocol_parser.py` + `core/protocol_mavlink.py`）：替代 MSP，20 Hz 刷新率
-- **数据管理**（`core/data_manager.py`）：CSV / JSON 导出、飞行统计、历史记录
-- **UI 主窗口**（`ui/main_window.py`）：集成多标签页（实时监控 / PID / 校准 / 记录 / 终端）
-- **自定义控件**（`ui/widgets/`）：地平仪、仪表盘、实时曲线、RC 通道等
-- **校准向导**（`ui/calibration_wizard.py`）：IMU / 陀螺 / 遥控 / 电调 / 磁力计
-- **GPS 追踪**（`core/gps_tracker.py`）、**航点管理**（`core/waypoint_manager.py`）、**电子围栏**（`core/geofence_manager.py`）
-- **黑匣子回放**（`ui/blackbox_replay_dialog.py`）
-- **参数历史对比**（`core/param_history.py` + `ui/param_history_dialog.py`）
-- 配置文件 `config/default_config.json`
-- Windows `start.bat`、Linux/Mac `start.sh` 一键启动脚本（自动安装依赖）
-- `requirements.txt` 依赖清单（PyQt5 / pyserial / pyqtgraph / numpy / pyyaml）
-- Git 仓库基础文件（`.gitignore`、`README.md`、本 `CHANGELOG.md`）
-- 自动同步脚本 `scripts/auto_sync.py`（每日 20:00 自动更新 CHANGELOG 并推送到远程仓库）
-
-### 🔧 Changed（变更）
-- 项目初版发布，无历史变更。
-
-### 🐛 Fixed（修复）
-- 无。
-
-### 🔒 Security（安全）
-- 无。
+### feat
+- **初始化 INAV Stellar Ground Control Station 项目 v1.0.0**
+  `main.py`, `core/`, `ui/`, `utils/` — 基于 PyQt5 + MAVLink 2.0 的飞控调试上位机，含实时姿态监控、PID 调参、传感器校准、数据记录与回放、GPS 追踪、航点管理、电子围栏、MQTT 远程遥测等功能
+- **搭建 Git 仓库基础设施**
+  `.gitignore`, `README.md`, `CHANGELOG.md` — 版本控制与文档初始化
 
 ---
 
-## 版本号含义
+## 变更类型说明
 
-| 级别 | 含义 |
+| 类型 | 含义 |
 |------|------|
-| **MAJOR** | 破坏性变更、大功能重构、API 不兼容 |
-| **MINOR** | 向后兼容的新功能、新模块 |
-| **PATCH** | 向后兼容的 bug 修复、小改动 |
-
----
-
-## 标签分类（自动生成时使用）
-
-| 标签 | 含义 |
-|------|------|
-| `Added` / `新增` | 新功能、新文件、新模块 |
-| `Changed` / `变更` | 现有功能或行为的变更 |
-| `Deprecated` / `弃用` | 标记为将来删除的功能 |
-| `Removed` / `移除` | 删除了功能或文件 |
-| `Fixed` / `修复` | bug 修复 |
-| `Security` / `安全` | 与安全相关的修复 |
+| `feat` | 新增功能、新模块、新接口 |
+| `fix` | Bug 修复、逻辑错误、稳定性问题 |
+| `refactor` | 代码重构、架构重写、无功能变更 |
+| `perf` | 性能 / 稳定性优化（滤波、时延、抗干扰） |
+| `config` | 配置 / 参数调整（阈值、优先级、默认值） |
+| `docs` | 文档更新（README、注释、图纸） |
+| `chore` | 代码清理 / 工程维护（删除冗余、废弃字段、构建清理） |
 
 ---
 
