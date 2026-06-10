@@ -1,0 +1,79 @@
+# ==============================
+# INAV Stellar GCS .gitignore
+# ==============================
+
+# --- Python 运行时 ---
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+*.pyd
+*.egg-info/
+
+# --- Python 环境 ---
+.Python
+venv/
+venv_pyqt/
+env/
+ENV/
+.venv/
+.python-version
+
+# --- PyInstaller / cx_Freeze 打包产物 ---
+build/
+dist/
+*.spec
+
+# --- IDE / 编辑器 ---
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# --- 日志与数据文件（全部忽略，但保留目录结构） ---
+logs/*.log
+logs/*.csv
+logs/*.json
+logs/params_history/param_history.json
+!logs/.gitkeep
+
+# --- 临时文件 ---
+*.tmp
+*.bak
+*.old
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# --- 系统文件 ---
+$RECYCLE.BIN/
+System Volume Information/
+
+# --- 虚拟环境缓存与包缓存 ---
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.coverage
+coverage.xml
+htmlcov/
+
+# --- pip / conda / poetry 锁文件可选忽略 ---
+# poetry.lock
+# Pipfile.lock
+
+# --- 本地配置覆盖 ---
+config/local_config.json
+config/user_config.json
+config/*.local.json
+
+# --- 校准输出文件 ---
+calibration_*.json
+
+# --- 状态文件 ---
+auto_sync_state.json
+changelog_state.json
+.last_sync*

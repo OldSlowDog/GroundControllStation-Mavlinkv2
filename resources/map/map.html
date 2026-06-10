@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>INAV Flight Map - Tencent GL</title>
+
+    <style>
+        /* ★ 地图容器样式 */
+        html, body {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        #map {
+            width: 100%;
+            height: 100vh;
+            background: #1a1a2e;
+        }
+
+        /* ★ 加载遮罩层 */
+        #loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+    </style>
+
+    <link rel="stylesheet" href="map.css" />
+
+    <!-- ★ 腾讯地图 JavaScript API GL (唯一地图引擎) -->
+    <!-- ⚠️ 需要申请API Key: https://lbs.qq.com/ -->
+    <script src="https://map.qq.com/api/gljs?v=1.exp&key=OB4BZ-D4W3U-B7VVO-4PJWW-6TKDJ-WPB77"></script>
+
+    <!-- ★ QWebChannel JS Bridge (必需！用于Python-JavaScript通信) -->
+    <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
+</head>
+<body>
+    <!-- Loading overlay -->
+    <div id="loading-overlay">
+        <div class="loading-spinner"></div>
+        <p>Loading Map...</p>
+    </div>
+
+    <!-- ★ 腾讯GL地图容器 -->
+    <div id="map"></div>
+
+    <div id="info-panel">
+        <div class="panel-header">
+            <span class="panel-title">📍 GPS Info</span>
+            <button id="close-gps-btn" title="关闭面板">×</button>
+        </div>
+        <div class="info-item">
+            <span class="label">Lat:</span>
+            <span id="lat-value">0.000000</span>
+        </div>
+        <div class="info-item">
+            <span class="label">Lon:</span>
+            <span id="lon-value">0.000000</span>
+        </div>
+        <div class="info-item">
+            <span class="label">Alt:</span>
+            <span id="alt-value">0 m</span>
+        </div>
+        <div class="info-item">
+            <span class="label">Speed:</span>
+            <span id="speed-value">0 m/s</span>
+        </div>
+        <div class="info-item">
+            <span class="label">Sats:</span>
+            <span id="sats-value">0</span>
+        </div>
+        <div class="info-item">
+            <span class="label">Fix:</span>
+            <span id="fix-value">No Fix</span>
+        </div>
+    </div>
+
+    <!-- 工具栏由Python QFrame创建，不在HTML中显示 -->
+
+    <script src="map.js"></script>
+</body>
+</html>

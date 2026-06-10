@@ -1,0 +1,60 @@
+{
+    "application": {
+        "name": "INAV Stellar GCS",
+        "version": "1.0.0",
+        "language": "zh-CN"
+    },
+    "connection": {
+        "default_baudrate": 1500000,
+        "timeout": 0.1,
+        "auto_reconnect": true,
+        "reconnect_interval_ms": 5000
+    },
+    "data_update": {
+        "ui_update_rate_hz": 20,
+        "request_rate_hz": 20,
+        "max_history_points": 1000
+    },
+    "serial_ports": {
+        "preferred_ports": ["COM3", "COM4", "COM5"],
+        "auto_detect": true
+    },
+    "display": {
+        "theme": "dark",
+        "window_width": 1400,
+        "window_height": 900,
+        "font_family": "Microsoft YaHei",
+        "font_size": 9
+    },
+    "gauges": {
+        "vbat_warning_v": 14.8,
+        "vbat_critical_v": 13.0,
+        "current_warning_a": 30,
+        "altitude_range_m": [-10, 100],
+        "throttle_range_us": [1000, 2000]
+    },
+    "pid_defaults": {
+        "roll": {"p": 45, "i": 40, "d": 0},
+        "pitch": {"p": 45, "i": 40, "d": 0},
+        "yaw": {"p": 30, "i": 45, "d": 0}
+    },
+    "logging": {
+        "level": "INFO",
+        "log_to_file": true,
+        "log_directory": "logs",
+        "max_log_files": 10
+    },
+    "recording": {
+        "auto_start": false,
+        "format": "csv",
+        "directory": "logs",
+        "include_timestamps": true
+    },
+    "calibration": {
+        "imu_accel_duration_s": 10,
+        "imu_gyro_duration_s": 5,
+        "rc_midpoint_duration_s": 3,
+        "esc_calibration_timeout_s": 30,
+        "compass_duration_s": 60
+    }
+}
