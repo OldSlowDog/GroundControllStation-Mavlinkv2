@@ -1,96 +1,59 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="zh-CN">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>INAV Flight Map - Tencent GL</title>
-
-    <style>
-        /* ★ 地图容器样式 */
-        html, body {
-            margin: 0;
-            padding: 0;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        #map {
-            width: 100%;
-            height: 100vh;
-            background: #1a1a2e;
-        }
-
-        /* ★ 加载遮罩层 */
-        #loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.5s ease;
-        }
-    </style>
-
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <title>GCS Map</title>
     <link rel="stylesheet" href="map.css" />
 
-    <!-- ★ 腾讯地图 JavaScript API GL (唯一地图引擎) -->
-    <!-- ⚠️ 需要申请API Key: https://lbs.qq.com/ -->
-    <!-- 注意：Key 不硬编码在此，由 Python 端从环境变量 MAP_JS_KEY 读取后动态注入 -->
-    <!-- MAP_JS_SDK_PLACEHOLDER (Python 端加载前会替换此行) -->
+    <!-- Leaflet.js 开源地图库（无需 API Key，完全免费） -->
+    <!-- 文档: https://leafletjs.com/ -->
+    <link
+        rel="stylesheet"
+        href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
+        integrity="sha256-p4NxAoJBhIIN+hmNHrzRCf9tD/miZyoHS5obTRR9BMY="
+        crossorigin=""
+    />
+    <script
+        src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
+        integrity="sha256-20nQCchB9co0qIjJZRGuk2/Z9VM+kNiyxNV1lvTlZBo="
+        crossorigin=""
+    ></script>
 
-    <!-- ★ QWebChannel JS Bridge (必需！用于Python-JavaScript通信) -->
+    <!-- Qt WebChannel（Python ↔ JavaScript 双向通信桥） -->
     <script src="qrc:///qtwebchannel/qwebchannel.js"></script>
 </head>
 <body>
-    <!-- Loading overlay -->
-    <div id="loading-overlay">
-        <div class="loading-spinner"></div>
-        <p>Loading Map...</p>
-    </div>
-
-    <!-- ★ 腾讯GL地图容器 -->
+    <!-- 主地图容器 -->
     <div id="map"></div>
 
-    <div id="info-panel">
-        <div class="panel-header">
-            <span class="panel-title">📍 GPS Info</span>
-            <button id="close-gps-btn" title="关闭面板">×</button>
-        </div>
-        <div class="info-item">
-            <span class="label">Lat:</span>
-            <span id="lat-value">0.000000</span>
-        </div>
-        <div class="info-item">
-            <span class="label">Lon:</span>
-            <span id="lon-value">0.000000</span>
-        </div>
-        <div class="info-item">
-            <span class="label">Alt:</span>
-            <span id="alt-value">0 m</span>
-        </div>
-        <div class="info-item">
-            <span class="label">Speed:</span>
-            <span id="speed-value">0 m/s</span>
-        </div>
-        <div class="info-item">
-            <span class="label">Sats:</span>
-            <span id="sats-value">0</span>
-        </div>
-        <div class="info-item">
-            <span class="label">Fix:</span>
-            <span id="fix-value">No Fix</span>
-        </div>
+    <!-- 左上：GPS/无人机信息面板 -->
+    <div id="gps-panel" class="info-panel hidden">
+        <div class="panel-title">📍 GPS / Drone</div>
+        <div class="panel-row"><span class="label">Fix:</span><span id="gps-fix">—</span></div>
+        <div class="panel-row"><span class="label">Sats:</span><span id="gps-sats">—</span></div>
+        <div class="panel-row"><span class="label">Lat:</span><span id="gps-lat">—</span></div>
+        <div class="panel-row"><span class="label">Lng:</span><span id="gps-lng">—</span></div>
+        <div class="panel-row"><span class="label">Alt:</span><span id="gps-alt">—</span></div>
+        <div class="panel-row"><span class="label">Spd:</span><span id="gps-speed">—</span></div>
+        <div class="panel-row"><span class="label">HDG:</span><span id="gps-hdg">—</span></div>
     </div>
 
-    <!-- 工具栏由Python QFrame创建，不在HTML中显示 -->
+    <!-- 右上：地点搜索框 -->
+    <div id="search-box" class="search-box">
+        <input
+            type="text"
+            id="search-input"
+            placeholder="🔍 搜索地点（Nominatim / 免费）"
+        />
+        <button id="search-btn">搜索</button>
+        <div id="search-results" class="search-results hidden"></div>
+    </div>
 
+    <!-- 状态提示条（底部浮动） -->
+    <div id="toast" class="toast hidden"></div>
+
+    <!-- 业务脚本：Leaflet 实现 + Qt WebChannel 桥 -->
     <script src="map.js"></script>
 </body>
 </html>
