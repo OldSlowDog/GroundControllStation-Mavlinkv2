@@ -133,7 +133,10 @@ class MapBridge(QObject):
 
     @pyqtSlot(str)
     def searchPlace(self, keyword: str):
-        """JS端调用：地点搜索（Python端签名+请求WebService API）"""
+        """JS端调用：地点搜索（Python端签名+请求WebService API）
+        API Key 和签名密钥从环境变量 MAP_WS_KEY / MAP_WS_SK 中读取，
+        请在项目根目录 .env 文件或系统环境变量中设置。
+        """
         import hashlib
         import urllib.parse
         try:
@@ -141,9 +144,21 @@ class MapBridge(QObject):
         except ImportError:
             from urllib2 import urlopen
 
-        KEY = 'HXLBZ-OJLWW-B2KR5-335LE-BB6XH-RIFCX'
-        SK = '5yX0hX9OXHNekXcbB03e6Fh97swtSUG6'
-        
+        # 从环境变量读取密钥（严禁在代码中硬编码！）
+        KEY = os.environ.get("MAP_WS_KEY", "").strip()
+        SK = os.environ.get("MAP_WS_SK", "").strip()
+
+        if not KEY or not SK:
+            err_msg = (
+                "未配置地图 API Key，请在项目根目录创建 .env 文件，"
+                "添加 MAP_WS_KEY=你的Key 和 MAP_WS_SK=你的SK"
+                "（申请地址: https://lbs.qq.com/）"
+            )
+            err_json = '{"status":-1,"message":"' + err_msg.replace('"', "'") + '"}'
+            self.searchResults.emit(err_json)
+            print("[MapBridge] " + err_msg)
+            return
+
         params = {
             'key': KEY,
             'keyword': keyword,
@@ -151,12 +166,12 @@ class MapBridge(QObject):
             'page_size': 10,
             'output': 'json'
         }
-        
+
         path = '/ws/place/v1/search'
         param_str = '&'.join(f"{k}={v}" for k, v in sorted(params.items()))
         str_to_sign = f"{path}?{param_str}{SK}"
         sig = hashlib.md5(str_to_sign.encode('utf-8')).hexdigest()
-        
+
         encoded_params = '&'.join(
             f"{urllib.parse.quote(k, safe='')}={urllib.parse.quote(str(v), safe='')}"
             for k, v in sorted(params.items())
@@ -216,7 +231,7 @@ class MapWidget(QWidget):
         self._is_loaded = False
 
     def _setup_ui(self):
-        """初始化UI布局"""
+        """初始化UI布局（动态注入地图JS SDK Key）"""
         layout = QVBoxLayout(self)
         layout.setContentsMargins(0, 0, 0, 0)
 
@@ -227,7 +242,47 @@ class MapWidget(QWidget):
             os.path.dirname(os.path.dirname(os.path.dirname(__file__))),
             'resources', 'map', 'map.html'
         )
-        self.web_view.load(QUrl.fromLocalFile(html_path))
+
+        # 从环境变量读取地图 JS SDK Key（不硬编码在代码中）
+        map_js_key = os.environ.get("MAP_JS_KEY", "").strip()
+
+        try:
+            with open(html_path, 'r', encoding='utf-8') as f:
+                html_content = f.read()
+
+            if map_js_key:
+                # 注入真实的腾讯地图 JS SDK URL
+                sdk_tag = (
+                    '<script src="https://map.qq.com/api/gljs?'
+                    'v=1.exp&key=' + map_js_key + '"></script>'
+                )
+                html_content = html_content.replace(
+                    '<!-- MAP_JS_SDK_PLACEHOLDER (Python 端加载前会替换此行) -->',
+                    sdk_tag
+                )
+            else:
+                # 没有 Key 的友好提示
+                warn = (
+                    '<div style="position:fixed;top:10px;left:50%;'
+                    'transform:translateX(-50%);background:#c00;color:#fff;'
+                    'padding:10px 20px;border-radius:4px;z-index:99999;'
+                    'font-family:Arial,sans-serif;font-size:14px;">'
+                    '未配置地图 API Key，请在项目根目录创建 .env 文件，'
+                    '添加 MAP_JS_KEY=你的Key（申请: https://lbs.qq.com/）'
+                    '</div>'
+                )
+                html_content = html_content.replace(
+                    '<!-- MAP_JS_SDK_PLACEHOLDER (Python 端加载前会替换此行) -->',
+                    warn
+                )
+                print("[MapWidget] 警告：未检测到 MAP_JS_KEY 环境变量，地图将无法渲染")
+
+            self.web_view.setHtml(html_content, QUrl.fromLocalFile(html_path))
+        except (FileNotFoundError, IOError) as e:
+            self.web_view.setHtml(
+                f"<h3>Cannot load map.html: {e}</h3>"
+                '<p>请确认 resources/map/map.html 文件存在</p>'
+            )
 
         self.web_view.loadFinished.connect(self._on_page_loaded)
 

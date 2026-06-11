@@ -1,6 +1,11 @@
 # ==============================
-# INAV Stellar GCS .gitignore
+# Ground Control Station .gitignore
 # ==============================
+
+# --- 敏感信息 / 密钥 / 凭证
+.env
+.env.local
+.env.*.local
 
 # --- Python 运行时 ---
 __pycache__/

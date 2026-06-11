@@ -7,7 +7,33 @@ import sys
 import os
 
 # 添加项目根目录到系统路径
-sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+_PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, _PROJECT_ROOT)
+
+# ── 加载 .env 文件（地图 API Key 等敏感信息保存在此处） ──
+# 不依赖 python-dotenv，自实现极简解析，避免额外依赖
+def _load_env():
+    env_path = os.path.join(_PROJECT_ROOT, ".env")
+    if not os.path.exists(env_path):
+        return
+    try:
+        with open(env_path, 'r', encoding='utf-8') as f:
+            for lineno, raw in enumerate(f, 1):
+                line = raw.strip()
+                if not line or line.startswith('#'):
+                    continue
+                if '=' not in line:
+                    continue
+                key, _, value = line.partition('=')
+                key = key.strip()
+                value = value.strip().strip('"').strip("'")
+                # 不覆盖已有的环境变量（允许用户在 shell 中预先设定）
+                if key and key not in os.environ:
+                    os.environ[key] = value
+    except Exception as e:
+        print(f"[Warning] 无法加载 .env: {e}")
+
+_load_env()
 
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import Qt
