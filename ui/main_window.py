@@ -18,7 +18,7 @@ from PyQt5.QtCore import Qt, QTimer, pyqtSignal, pyqtSlot
 from PyQt5.QtGui import QFont, QIcon, QColor
 
 from core.communication import comm_serial, comm_tcp
-from core.protocol_parser import MSPProtocolParser, FlightData
+from core.protocol_parser import create_protocol_parser, FlightData, ProtocolType
 from core.data_manager import data_manager
 from core.mqtt_manager import MQTTManager, MQTTPreset, MQTTConfig  # ★ 新增: MQTT支持
 from ui.widgets.attitude_widget import AttitudeWidget
@@ -50,8 +50,9 @@ class MainWindow(QMainWindow):
         self.setMinimumSize(1200, 750)
         self.resize(1400, 900)  # 适中的默认尺寸
 
-        # 初始化核心组件
-        self.parser = MSPProtocolParser()
+        # 初始化核心组件（默认 MAVLink 协议，可在 UI 中切换）
+        self.protocol_kind = "mavlink"
+        self.parser = create_protocol_parser(self.protocol_kind)
         self.update_timer = QTimer()
         self.update_timer.timeout.connect(self._update_data_cycle)
 
@@ -173,6 +174,20 @@ class MainWindow(QMainWindow):
         self.conn_mode_combo.addItems(["📡 Serial (USB)", "📶 WiFi (TCP)", "📡 4G/MQTT (远程)"])  # ★ 新增: 4G选项
         self.conn_mode_combo.currentIndexChanged.connect(self._on_conn_mode_changed)
         layout.addWidget(self.conn_mode_combo)
+
+        # ===== 协议选择（MAVLink / MSP） =====
+        protocol_label = QLabel("Protocol:")
+        protocol_label.setMinimumWidth(60)
+        layout.addWidget(protocol_label)
+        self.protocol_combo = QComboBox()
+        self.protocol_combo.addItem("MAVLink 2.0", "mavlink")
+        self.protocol_combo.addItem("MSP (INAV/Betaflight)", "msp")
+        self.protocol_combo.setToolTip(
+            "MAVLink 2.0 — PX4 / ArduPilot / 新版 INAV\n"
+            "MSP — 老版 INAV / Betaflight / Cleanflight"
+        )
+        self.protocol_combo.currentIndexChanged.connect(self._on_protocol_changed)
+        layout.addWidget(self.protocol_combo)
 
         # ===== Serial 模式控件 =====
         self.serial_widget = QWidget()
@@ -345,6 +360,14 @@ class MainWindow(QMainWindow):
             self.serial_widget.setVisible(False)
             self.wifi_widget.setVisible(False)
             self.mqtt_widget.setVisible(True)
+
+    def _on_protocol_changed(self, index: int):
+        """协议切换（MAVLink ↔ MSP）"""
+        new_kind = self.protocol_combo.currentData()
+        if new_kind and new_kind != self.protocol_kind:
+            self.protocol_kind = new_kind
+            self.parser = create_protocol_parser(new_kind)
+            logger.info(f"Protocol switched to: {new_kind.upper()}")
 
     def _scan_wifi_networks(self):
         """扫描WiFi网络（提示用户）"""

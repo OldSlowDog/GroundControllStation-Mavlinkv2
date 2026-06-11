@@ -1,11 +1,12 @@
 {
     "application": {
-        "name": "INAV Stellar GCS",
-        "version": "1.0.0",
+        "name": "Ground Control Station",
+        "version": "1.1.0",
         "language": "zh-CN"
     },
     "connection": {
-        "default_baudrate": 1500000,
+        "default_protocol": "mavlink",
+        "default_baudrate": 115200,
         "timeout": 0.1,
         "auto_reconnect": true,
         "reconnect_interval_ms": 5000
@@ -56,5 +57,15 @@
         "rc_midpoint_duration_s": 3,
         "esc_calibration_timeout_s": 30,
         "compass_duration_s": 60
+    },
+    "protocols": {
+        "mavlink": {
+            "description": "MAVLink 2.0 (PX4 / ArduPilot / 新版 INAV)",
+            "enabled": true
+        },
+        "msp": {
+            "description": "MSP (老版 INAV / Betaflight / Cleanflight)",
+            "enabled": true
+        }
     }
 }
